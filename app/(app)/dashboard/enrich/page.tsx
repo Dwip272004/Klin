@@ -21,7 +21,8 @@ async function runEnrichment(formData: FormData) {
   if (error || !jobId) redirect("/dashboard/enrich?error=" + encodeURIComponent(error?.message ?? "Could not start run"));
 
   const admin = createAdminClient();
-  const { data: rows } = await admin.from("enrichment_rows").select("id,input_url").eq("job_id", jobId);
+  const { data: rows, error: rowsErr } = await admin.from("enrichment_rows").select("id,input_url").eq("job_id", jobId);
+  if (rowsErr) console.error("enrichment: could not read rows", rowsErr.message);
   const results: { id: string; status: string; result?: unknown }[] = [];
   try {
     const outcomes = await enrichBatch((rows ?? []).map((r) => ({ id: r.id, url: r.input_url })));
