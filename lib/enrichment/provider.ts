@@ -2,15 +2,15 @@ export type Enriched = { name?: string; title?: string; company?: string; locati
 export type RowOutcome = { status: "found" | "not_found" | "error"; result?: Enriched };
 export type BatchRow = { id: string; url: string };
 
-const BASE = "https://api.seamless.ai/api/client/v1";
+const base = () => (process.env.ENRICHMENT_API_URL ?? "").replace(/\/$/, "");
 const POLL_EVERY_MS = 5000;
 const DEADLINE_MS = 50_000; // stay inside the 60s function limit
 
 export function providerConfigured() {
-  return Boolean(process.env.SEAMLESS_API_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(process.env.ENRICHMENT_API_KEY && process.env.ENRICHMENT_API_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-const headers = () => ({ "Content-Type": "application/json", Token: process.env.SEAMLESS_API_KEY! });
+const headers = () => ({ "Content-Type": "application/json", Token: process.env.ENRICHMENT_API_KEY! });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Statuses that mean the request is still in flight (or may flip shortly after acceptance).
@@ -33,7 +33,7 @@ export async function enrichBatch(rows: BatchRow[]): Promise<Map<string, RowOutc
   const out = new Map<string, RowOutcome>();
   const fail = () => { for (const r of rows) if (!out.has(r.id)) out.set(r.id, { status: "error" }); return out; };
   try {
-    const res = await fetch(`${BASE}/contacts/research`, {
+    const res = await fetch(`${base()}/contacts/research`, {
       method: "POST", headers: headers(), signal: AbortSignal.timeout(20000),
       body: JSON.stringify({ contacts: rows.map((r) => ({ liProfileUrl: r.url })), researchTypes: ["email"] }),
     });
@@ -47,7 +47,7 @@ export async function enrichBatch(rows: BatchRow[]): Promise<Map<string, RowOutc
     let waiting = [...requestIds];
     while (waiting.length && Date.now() - start < DEADLINE_MS) {
       await sleep(POLL_EVERY_MS);
-      const p = await fetch(`${BASE}/contacts/research/poll?requestIds=${waiting.join(",")}`, { headers: headers(), signal: AbortSignal.timeout(20000) });
+      const p = await fetch(`${base()}/contacts/research/poll?requestIds=${waiting.join(",")}`, { headers: headers(), signal: AbortSignal.timeout(20000) });
       if (!p.ok) continue;
       const { data } = (await p.json()) as { data?: PollItem[] };
       const still: string[] = [];

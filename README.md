@@ -12,7 +12,7 @@ Next.js 15 + Supabase. Login (password, magic link, Google), profile, credit led
 3. In Supabase > Authentication > URL Configuration set Site URL to your Vercel URL and add `https://<your-domain>/auth/callback` to Redirect URLs.
 4. (Optional) enable the Google provider in Supabase.
 
-Enrichment needs SEAMLESS_API_KEY and SUPABASE_SERVICE_ROLE_KEY (server-only). Confirm your data provider permits resale before launch.
+Enrichment needs ENRICHMENT_API_KEY, ENRICHMENT_API_URL and SUPABASE_SERVICE_ROLE_KEY (server-only).
 
 ## Razorpay payments
 Set server-only env vars: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`.

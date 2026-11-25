@@ -259,3 +259,13 @@ main,.workspace{animation:fadepage .45s cubic-bezier(.2,.7,.2,1) both}
 .quick:hover{background:var(--butter);border-style:solid}
 .quick-tag{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .quick-line{font-size:18px;margin-top:2px}.quick-line strong{font:400 30px var(--display);margin-right:4px}
+
+/* legal pages */
+.legal{max-width:68ch}
+.legal h2{font:400 28px/1.15 var(--display);margin:40px 0 12px}
+.legal p,.legal li{color:var(--ink-2);font-size:16.5px}
+.legal p{margin:0 0 14px}
+.legal ul{padding-left:20px;margin:0 0 14px;display:grid;gap:6px}
+.legal a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.legal strong{color:var(--ink)}
+.foot-links{flex-wrap:wrap}

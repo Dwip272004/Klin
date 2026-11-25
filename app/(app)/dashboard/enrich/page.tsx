@@ -43,7 +43,7 @@ export default async function Enrich({ searchParams }: { searchParams: Promise<{
   return (
     <>
       <div className="ws-head"><h1>New enrichment</h1></div>
-      {!ready && <div className="msg err" style={{ maxWidth: 720 }}>The data source isn&apos;t connected yet, so runs are paused. An admin needs to set <span className="mono">SEAMLESS_API_KEY</span> and <span className="mono">SUPABASE_SERVICE_ROLE_KEY</span>.</div>}
+      {!ready && <div className="msg err" style={{ maxWidth: 720 }}>Enrichment is temporarily unavailable, so new runs are paused. Please check back soon.</div>}
       {error && <div className="msg err" style={{ maxWidth: 720 }}>{error}</div>}
       <div style={{ maxWidth: 720 }}><EnrichForm action={runEnrichment} balance={balance ?? 0} disabled={!ready} /></div>
     </>
