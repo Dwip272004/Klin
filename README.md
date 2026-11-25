@@ -13,3 +13,9 @@ Next.js 15 + Supabase. Login (password, magic link, Google), profile, credit led
 4. (Optional) enable the Google provider in Supabase.
 
 Enrichment needs SEAMLESS_API_KEY and SUPABASE_SERVICE_ROLE_KEY (server-only). Confirm your data provider permits resale before launch.
+
+## Razorpay payments
+Set server-only env vars: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`.
+In the Razorpay dashboard: use Test mode first, turn on auto-capture, and add a webhook to
+`https://<your-domain>/api/razorpay/webhook` for events `payment.captured` and `order.paid`
+(use the same secret as `RAZORPAY_WEBHOOK_SECRET`).

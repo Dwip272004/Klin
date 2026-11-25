@@ -17,3 +17,6 @@ export const QUICK = { id: "quick", name: "Quick", profiles: 2, priceInr: 5 };
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 export const perProfile = (p: Plan) => "₹" + (p.priceInr / p.profiles).toFixed(2);
 export const FREE_CREDITS = 25;
+
+export const ALL_PLANS = [QUICK, ...PLANS];
+export const planById = (id: string) => ALL_PLANS.find((p) => p.id === id);
