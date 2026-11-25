@@ -405,3 +405,4 @@ section.block{padding:104px 0}
 @media(prefers-reduced-motion:reduce){.marquee-track{animation:none}.swash path{stroke-dashoffset:0}.progress span{width:83%}}
 .appwin td b{display:block;font-weight:600}
 .appwin td small{display:block;color:var(--ink-3);font-size:11px}
+.msg.warn{border-color:#c9a227;color:#6b5200;background:var(--butter)}

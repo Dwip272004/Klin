@@ -4,6 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FREE_CREDITS } from "@/lib/pricing";
 
+// Flip on by setting NEXT_PUBLIC_GOOGLE_AUTH=on once the Google provider is configured in Supabase.
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_AUTH === "on";
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
@@ -66,7 +69,10 @@ function LoginForm() {
           {ok && <div className="msg ok">{ok}</div>}
           <p style={{ marginTop: 18 }}><button className="btn block" disabled={busy} type="submit">{busy ? "One moment…" : mode === "signin" ? "Log in" : mode === "signup" ? "Create account" : "Send magic link"}</button></p>
         </form>
-        <p style={{ marginTop: 10 }}><button type="button" className="btn ghost block" onClick={google}>Continue with Google</button></p>
+        <p style={{ marginTop: 10 }}>
+          <button type="button" className="btn ghost block" onClick={google} disabled={!GOOGLE_ENABLED} aria-describedby={GOOGLE_ENABLED ? undefined : "g-note"}>Continue with Google</button>
+        </p>
+        {!GOOGLE_ENABLED && <div id="g-note" className="msg warn" role="status"><strong>Google sign-in is under maintenance.</strong> Please use your email and password or a magic link for now.</div>}
       </div></div>
     </div>
   );
