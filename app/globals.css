@@ -269,3 +269,49 @@ main,.workspace{animation:fadepage .45s cubic-bezier(.2,.7,.2,1) both}
 .legal a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .legal strong{color:var(--ink)}
 .foot-links{flex-wrap:wrap}
+
+/* LinkedIn-style job board */
+.jobs-page{padding-bottom:60px}
+.jsearch{background:var(--card);border-bottom:1.5px solid var(--ink);padding:18px 0 12px;position:sticky;top:64px;z-index:10}
+.jsearch-row{display:grid;grid-template-columns:2fr 1.2fr auto;gap:10px}
+.jfilters{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.fchip{padding:5px 14px;border:1.5px solid var(--ink-3);border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;color:var(--ink-2);transition:background .15s,color .15s,border-color .15s}
+.fchip:hover{border-color:var(--ink);color:var(--ink)}
+.fchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fclear{font-size:14px;color:var(--accent);font-weight:600;margin-left:6px}
+@media(max-width:640px){.jsearch-row{grid-template-columns:1fr}.jsearch{position:static}}
+
+.jobs-layout{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:0;margin-top:20px;border:1.5px solid var(--ink);border-radius:12px;background:var(--card);overflow:hidden;height:calc(100vh - 230px);min-height:480px}
+.jl-list{overflow-y:auto;border-right:1.5px solid var(--ink)}
+.jl-count{padding:12px 18px;font:500 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper-2);z-index:1}
+.jcard{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line);text-decoration:none;position:relative;transition:background .15s}
+.jcard:hover{background:var(--paper)}
+.jcard.active{background:var(--butter)}
+.jcard.active::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.jlogo{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;color:#fff;font-family:var(--display);flex:none}
+.jcard-body{min-width:0}
+.jcard h3{font:700 16px/1.3 var(--sans);color:var(--accent);margin:0;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.jcard:hover h3{text-decoration:underline}
+.jcard-co{font-size:14px;color:var(--ink);margin-top:2px}
+.jcard-meta{font-size:13.5px;color:var(--ink-3);margin-top:2px}
+.jcard-time{font-size:12.5px;color:var(--moss);font-weight:600;margin-top:6px}
+.jl-detail{overflow-y:auto;padding:28px 32px}
+.jback{display:none;margin-bottom:14px;font-weight:600;text-decoration:none}
+.jback.show{display:inline-block}
+.jd-head{display:flex;gap:16px;align-items:center}
+.jd-head h2{font-size:clamp(28px,3vw,40px)}
+.jd-sub{margin-top:6px;color:var(--ink-2)}
+.jd-tags{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+.tag{padding:4px 12px;background:var(--paper-2);border:1px solid var(--line);border-radius:6px;font-size:13.5px;font-weight:600}
+.jd-actions{margin:16px 0 8px}
+.jd-h{font:400 26px var(--display);margin:28px 0 10px;padding-top:20px;border-top:1px solid var(--line)}
+.jd-body{white-space:pre-wrap;color:var(--ink-2);font-size:16.5px;max-width:70ch}
+.jempty{text-align:center;padding:80px 20px;display:grid;gap:12px;justify-items:center}
+
+@media(max-width:860px){
+  .jobs-layout{grid-template-columns:1fr;height:auto;min-height:0}
+  .jl-list{border-right:0;overflow:visible}
+  .jobs-layout[data-open="1"] .jl-list{display:none}
+  .jobs-layout[data-open="0"] .jl-detail{display:none}
+  .jl-detail{padding:20px 18px}.jback{display:inline-block}
+}
