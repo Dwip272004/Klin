@@ -1,29 +1,66 @@
 export type Enriched = { name?: string; title?: string; company?: string; location?: string; email?: string; linkedin_url: string };
 export type RowOutcome = { status: "found" | "not_found" | "error"; result?: Enriched };
+export type BatchRow = { id: string; url: string };
+
+const BASE = "https://api.seamless.ai/api/client/v1";
+const POLL_EVERY_MS = 5000;
+const DEADLINE_MS = 50_000; // stay inside the 60s function limit
 
 export function providerConfigured() {
-  return Boolean(process.env.ENRICHMENT_API_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(process.env.SEAMLESS_API_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-// Data-provider adapter. Swap this function to change the source; the rest of the app does not care.
-// Current implementation targets Apollo's people-match endpoint (untested against a live key).
-export async function enrichOne(linkedinUrl: string): Promise<RowOutcome> {
+const headers = () => ({ "Content-Type": "application/json", Token: process.env.SEAMLESS_API_KEY! });
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Statuses that mean the request is still in flight (or may flip shortly after acceptance).
+const PENDING = new Set(["queued", "researching", "missing"]);
+
+type PollItem = { requestId: string; status?: string; contact?: Record<string, any> | null };
+
+function toOutcome(url: string, item: PollItem): RowOutcome {
+  const c = item.contact ?? {};
+  const email = typeof c.email === "string" && c.email ? c.email : undefined;
+  if (!email) return { status: item.status === "error" ? "error" : "not_found" };
+  const loc = c.contactLocation ?? {};
+  const location = loc.fullString || [loc.city ?? c.city, loc.state ?? c.state, loc.country ?? c.country].filter(Boolean).join(", ") || undefined;
+  return { status: "found", result: { name: c.fullName || c.name, title: c.jobTitle || c.title, company: c.companyName || c.company, location, email, linkedin_url: url } };
+}
+
+// Data-provider adapter (email-only research = 1 credit per found contact).
+// Swap this function to change the source; the rest of the app only sees RowOutcome.
+export async function enrichBatch(rows: BatchRow[]): Promise<Map<string, RowOutcome>> {
+  const out = new Map<string, RowOutcome>();
+  const fail = () => { for (const r of rows) if (!out.has(r.id)) out.set(r.id, { status: "error" }); return out; };
   try {
-    const res = await fetch("https://api.apollo.io/api/v1/people/match", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", "x-api-key": process.env.ENRICHMENT_API_KEY! },
-      body: JSON.stringify({ linkedin_url: linkedinUrl, reveal_personal_emails: false }),
-      signal: AbortSignal.timeout(15000),
+    const res = await fetch(`${BASE}/contacts/research`, {
+      method: "POST", headers: headers(), signal: AbortSignal.timeout(20000),
+      body: JSON.stringify({ contacts: rows.map((r) => ({ liProfileUrl: r.url })), researchTypes: ["email"] }),
     });
-    if (res.status === 404) return { status: "not_found" };
-    if (!res.ok) return { status: "error" };
-    const { person } = (await res.json()) as { person?: Record<string, any> | null };
-    if (!person) return { status: "not_found" };
-    const email = typeof person.email === "string" && !person.email.startsWith("email_not_unlocked") ? person.email : undefined;
-    const location = [person.city, person.state, person.country].filter(Boolean).join(", ") || undefined;
-    const result: Enriched = { name: person.name, title: person.title, company: person.organization?.name, location, email, linkedin_url: linkedinUrl };
-    return result.name || result.email ? { status: "found", result } : { status: "not_found" };
+    if (!res.ok) return fail();
+    const { requestIds } = (await res.json()) as { requestIds?: string[] };
+    // One request ID per contact, in input order.
+    if (!requestIds || requestIds.length !== rows.length) return fail();
+    const byReq = new Map(requestIds.map((id, i) => [id, rows[i]]));
+
+    const start = Date.now();
+    let waiting = [...requestIds];
+    while (waiting.length && Date.now() - start < DEADLINE_MS) {
+      await sleep(POLL_EVERY_MS);
+      const p = await fetch(`${BASE}/contacts/research/poll?requestIds=${waiting.join(",")}`, { headers: headers(), signal: AbortSignal.timeout(20000) });
+      if (!p.ok) continue;
+      const { data } = (await p.json()) as { data?: PollItem[] };
+      const still: string[] = [];
+      for (const item of data ?? []) {
+        const row = byReq.get(item.requestId);
+        if (!row) continue;
+        if (item.status && PENDING.has(item.status) && Date.now() - start < DEADLINE_MS - POLL_EVERY_MS) still.push(item.requestId);
+        else out.set(row.id, toOutcome(row.url, item));
+      }
+      waiting = still;
+    }
+    return fail(); // anything unresolved by the deadline is refunded as an error
   } catch {
-    return { status: "error" };
+    return fail();
   }
 }
