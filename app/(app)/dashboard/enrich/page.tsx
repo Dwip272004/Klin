@@ -42,10 +42,10 @@ export default async function Enrich({ searchParams }: { searchParams: Promise<{
   const ready = providerConfigured();
   return (
     <>
-      <div className="ws-head"><h1>New enrichment</h1></div>
-      {!ready && <div className="msg err" style={{ maxWidth: 720 }}>Enrichment is temporarily unavailable, so new runs are paused. Please check back soon.</div>}
-      {error && <div className="msg err" style={{ maxWidth: 720 }}>{error}</div>}
-      <div style={{ maxWidth: 720 }}><EnrichForm action={runEnrichment} balance={balance ?? 0} disabled={!ready} /></div>
+      <div className="ws-head"><div><div className="eyebrow">Enrich</div><h1>New enrichment</h1><p className="muted sub">Paste profile links and get a table of contact details.</p></div></div>
+      {!ready && <div className="msg warn">Enrichment is temporarily unavailable, so new runs are paused. Please check back soon.</div>}
+      {error && <div className="msg err" >{error}</div>}
+      <div><EnrichForm action={runEnrichment} balance={balance ?? 0} disabled={!ready} /></div>
     </>
   );
 }
